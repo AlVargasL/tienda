@@ -1,6 +1,7 @@
 
 package com.example.tienda.controller;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -17,6 +18,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.example.tienda.dto.CategoryRequest;
 import com.example.tienda.dto.CategoryResponse;
+import com.example.tienda.exception.ResourceNotFoundException;
+import com.example.tienda.model.Category;
 import com.example.tienda.service.CategoryService;
 
 import jakarta.validation.Valid;
@@ -33,25 +36,26 @@ public class CategoryController {
 
     @GetMapping("")
     public ResponseEntity<List<CategoryResponse>> getAll() {
-        return ResponseEntity.ok(service.getAll());
+        List<CategoryResponse> listResponse = new ArrayList<>();
+        for (Category cat : service.getAll()) {
+            listResponse.add(toResponse(cat));
+        }
+
+        return ResponseEntity.ok(listResponse);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<CategoryResponse> findById(
-            @PathVariable Long id) {
+    public ResponseEntity<CategoryResponse> findById(@PathVariable Long id) {
 
-        Optional<CategoryResponse> category = service.findById(id);
-
-        if (category.isPresent()) {
-            return ResponseEntity.ok(category.get());
-        }
-
-        return ResponseEntity.notFound().build();
+        Category category = service.findById(id).orElseThrow(
+            () ->
+                new ResourceNotFoundException("Category not found with id: " + id)
+        );
+        return ResponseEntity.ok(toResponse(category));
     }
 
     @PostMapping("")
-    public ResponseEntity<CategoryResponse> save(
-            @Valid @RequestBody CategoryRequest request) {
+    public ResponseEntity<CategoryResponse> save(@Valid @RequestBody CategoryRequest request) {
 
         CategoryResponse saved = service.save(request);
 
@@ -59,9 +63,7 @@ public class CategoryController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<CategoryResponse> update(
-            @PathVariable Long id,
-            @Valid @RequestBody CategoryRequest request) {
+    public ResponseEntity<CategoryResponse> update(@PathVariable Long id, @Valid @RequestBody CategoryRequest request) {
 
         CategoryResponse updated = service.update(id, request);
         return ResponseEntity.ok(updated);
@@ -77,5 +79,18 @@ public class CategoryController {
         }
 
         return ResponseEntity.notFound().build();
+    }
+
+    private CategoryResponse toResponse(Category category) {
+        return new CategoryResponse(
+            category.getId(),
+            category.getName()
+        );
+    }
+
+    private Category toEntity(CategoryRequest request) {
+        Category category = new Category();
+        category.setName(request.name());
+        return category;
     }
 }

@@ -46,10 +46,10 @@ public class ProductController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ProductResponse> getMethodName(@PathVariable Long id) {
+    public ResponseEntity<ProductResponse> getById(@PathVariable Long id) {
         Product product = service.findById(id).orElseThrow(
             () ->
-                new ResourceNotFoundException("Product not found with id" + id)
+                new ResourceNotFoundException("Product not found with id: " + id)
         );
         
         return ResponseEntity.ok(toResponse(product));
@@ -57,7 +57,6 @@ public class ProductController {
 
     @PostMapping()
     public ResponseEntity<ProductResponse> save(@Valid @RequestBody ProductRequest product) {
-
         Product save = service.save(toEntity(product),product.categoryId()); //save recibe el producto y atraves del de service.save con toEntity de producto lo guardamos empatando los tipos de datos
         return  ResponseEntity.status(HttpStatus.CREATED).body(toResponse(save));
     }
@@ -73,13 +72,9 @@ public class ProductController {
 
     @PutMapping("/{id}")
     public ResponseEntity<ProductResponse> update(@PathVariable Long id,@Valid @RequestBody ProductRequest product) {
-        Product optional = service.update(
-            id, 
-            toEntity(product),
-            product.categoryId()
-        );
+        Product updated = service.update(id, toEntity(product), product.categoryId());
         
-        return ResponseEntity.notFound().build();
+        return ResponseEntity.ok(toResponse(updated));
     }
 
     private ProductResponse toResponse(Product product){
@@ -105,11 +100,7 @@ public class ProductController {
             @PathVariable Long id, 
             @Valid @RequestBody StockRequest stockRequest) {
 
-        Product updatedProduct = service.updateStock(
-            id, 
-            stockRequest.action(), 
-            stockRequest.cantidad()
-        );
+        Product updatedProduct = service.updateStock(id, stockRequest.action(), stockRequest.cantidad());
 
         return ResponseEntity.ok(toResponse(updatedProduct));
     }

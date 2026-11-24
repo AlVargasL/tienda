@@ -21,26 +21,12 @@ public class CategoryService {
         this.repo = repo;
     }
 
-    public List<CategoryResponse> getAll() {
-        List<Category> categories = repo.findAll();
-        List<CategoryResponse> responses = new ArrayList<>();
-
-        for (Category category : categories) {
-            responses.add(mapToResponse(category));
-        }
-
-        return responses;
+    public List<Category> getAll() {
+        return repo.findAll();
     }
 
-    public Optional<CategoryResponse> findById(Long id) {
-        Optional<Category> optionalCategory = repo.findById(id);
-
-        if (optionalCategory.isPresent()) {
-            Category category = optionalCategory.get();
-            return Optional.of(mapToResponse(category));
-        }
-
-        return Optional.empty();
+    public Optional<Category> findById(Long id) {
+        return repo.findById(id);
     }
 
     public CategoryResponse save(CategoryRequest request) {
@@ -53,7 +39,8 @@ public class CategoryService {
 
     public CategoryResponse update(long id, CategoryRequest request) {
         Category categoryDb = repo.findById(id).orElseThrow(
-            () -> new ResourceNotFoundException("Category not found with id: " + id)
+            () -> 
+                new ResourceNotFoundException("Category not found with id: " + id)
         );
 
         categoryDb.setName(request.name());

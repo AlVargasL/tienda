@@ -32,9 +32,7 @@ public class ProductService {
     }
 
     public Product save(Product product, Long categoryId){
-        Category category = repoCategory
-            .findById(categoryId)
-            .orElseThrow(
+        Category category = repoCategory.findById(categoryId).orElseThrow(
             () -> // Expresion anonima(landa), solo se lanza cuando no encuentre una categoria, devuelve esta excepción
                 new ResourceNotFoundException("Category not found whit id: " + categoryId)
         );//Brujeria para encontrar un error, cuando no encuentra el id de la categoria, lanza una excepcion
@@ -43,7 +41,6 @@ public class ProductService {
     }
 
     public Product update(long id, Product product, Long categoryId) {
-
         Product productDb = repo.findById(id).orElseThrow(
             () ->
                 new ResourceNotFoundException("Product not found with id: " + id)
